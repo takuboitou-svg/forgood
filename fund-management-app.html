@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>田久保前市長×1億円請求プロジェクト - 支援金管理</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif; margin: 0; background: #f5f7fa; color: #222; }
+  header { background: linear-gradient(135deg,#1e3c72,#2a5298); color: #fff; padding: 24px 32px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  header h1 { margin: 0 0 4px; font-size: 22px; }
+  header .sub { font-size: 13px; opacity: .9; }
+  header .stats { display: flex; gap: 32px; margin-top: 12px; flex-wrap: wrap; }
+  header .stats div { font-size: 13px; }
+  header .stats strong { font-size: 18px; display: block; }
+  nav { background: #fff; border-bottom: 1px solid #e0e6ed; padding: 0 32px; display: flex; gap: 4px; }
+  nav button { background: none; border: none; padding: 14px 18px; cursor: pointer; font-size: 14px; color: #555; border-bottom: 3px solid transparent; }
+  nav button.active { color: #1e3c72; border-bottom-color: #1e3c72; font-weight: 600; }
+  nav button:hover { background: #f0f4f9; }
+  main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .card h2 { margin-top: 0; color: #1e3c72; font-size: 20px; border-bottom: 2px solid #eef2f7; padding-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: #f0f4f9; text-align: left; padding: 10px 12px; color: #555; font-weight: 600; border-bottom: 2px solid #d0dae6; }
+  td { padding: 10px 12px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
+  tr:hover td { background: #fafbfd; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .b-draft { background: #e0e0e0; color: #555; }
+  .b-review { background: #fff3cd; color: #856404; }
+  .b-approved { background: #cce5ff; color: #004085; }
+  .b-paid { background: #d4edda; color: #155724; }
+  .b-published { background: #d1ecf1; color: #0c5460; }
+  .b-rejected { background: #f8d7da; color: #721c24; }
+  form { display: grid; gap: 14px; max-width: 600px; }
+  label { font-size: 13px; color: #555; font-weight: 600; }
+  input, select, textarea { padding: 10px 12px; border: 1px solid #ccd5e0; border-radius: 6px; font-size: 14px; font-family: inherit; }
+  textarea { min-height: 80px; resize: vertical; }
+  button.primary { background: #1e3c72; color: #fff; border: none; padding: 11px 22px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  button.primary:hover { background: #2a5298; }
+  button.secondary { background: #fff; color: #1e3c72; border: 1px solid #1e3c72; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  button.danger { background: #fff; color: #c82333; border: 1px solid #c82333; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  button.small { background: #f0f4f9; color: #1e3c72; border: 1px solid #ccd5e0; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .login-box { max-width: 380px; margin: 80px auto; }
+  .login-box .card { padding: 32px; }
+  .login-box h2 { text-align: center; border-bottom: none; padding-bottom: 0; }
+  .progress { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #555; }
+  .progress .dot { width: 12px; height: 12px; border-radius: 50%; background: #e0e0e0; }
+  .progress .dot.on { background: #28a745; }
+  .progress .dot.current { background: #ffc107; box-shadow: 0 0 0 4px rgba(255,193,7,.25); }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .user-tag { background: #eef2f7; padding: 6px 12px; border-radius: 16px; font-size: 13px; color: #1e3c72; }
+  .empty { text-align: center; color: #999; padding: 32px; font-size: 14px; }
+  .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+  .alert.info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+  .alert.success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+  .alert.warn { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+  .alert.error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+  .public-grid { display: grid; gap: 16px; }
+  .public-item { background: #fff; padding: 20px; border-radius: 8px; border-left: 5px solid #17a2b8; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .public-item .meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .public-item h3 { margin: 0 0 8px; color: #1e3c72; font-size: 17px; }
+  .public-item .amount { font-size: 22px; font-weight: 700; color: #1e3c72; margin: 8px 0; }
+  .public-item p { margin: 8px 0 0; color: #555; line-height: 1.6; font-size: 14px; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
+  .summary .item { background: #fff; padding: 18px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .summary .item .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .summary .item .value { font-size: 24px; font-weight: 700; color: #1e3c72; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border-radius: 8px; padding: 24px; max-width: 600px; width: 90%; max-height: 90vh; overflow: auto; }
+  .modal h3 { margin-top: 0; color: #1e3c72; }
+  .checklist { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .checklist div { font-size: 13px; padding: 8px; background: #f0f4f9; border-radius: 4px; }
+  .checklist .ok { background: #d4edda; color: #155724; }
+  footer { text-align: center; padding: 24px; color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>田久保前市長×1億円請求プロジェクト</h1>
+  <div class="sub">支援金 内部決済管理 &amp; 公開報告システム</div>
+  <div class="stats">
+    <div><strong id="pubRaised">¥1,505,000</strong>支援総額</div>
+    <div><strong>151人</strong>支援者数</div>
+    <div><strong id="statReceived">¥0</strong>承認済・出金待ち</div>
+    <div><strong id="statUsed">¥0</strong>公開済（使用済み）</div>
+    <div><strong id="statBalance">¥1,505,000</strong>残高</div>
+  </div>
+</header>
+
+<div id="loginArea"></div>
+<nav id="topNav" style="display:none">
+  <button data-view="public" class="active">📊 公開報告</button>
+  <button data-view="new">➕ 新規申請</button>
+  <button data-view="approvals">✅ 承認待ち</button>
+  <button data-view="disbursement">💰 出金処理</button>
+  <button data-view="all">📋 全申請一覧</button>
+  <button data-view="admin">⚙️ 管理</button>
+</nav>
+<main id="main"></main>
+<footer>© 2026 田久保前市長プロジェクト — 透明性の確保</footer>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const STORAGE_KEY = 'takubo_fund_app_v1';
+
+const APPROVERS = ['関川','松島','大竹','渡辺'];
+const TREASURER = '会計';
+const ROLES = {
+  approver: APPROVERS,
+  treasurer: [TREASURER],
+  any: APPROVERS.concat([TREASURER,'閲覧'])
+};
+
+// Default users (passwords can be changed in admin)
+const DEFAULT_USERS = [
+  {id:'sekikawa', name:'関川',   password:'pass1234', role:'approver'},
+  {id:'matsushima', name:'松島', password:'pass1234', role:'approver'},
+  {id:'otake',     name:'大竹',   password:'pass1234', role:'approver'},
+  {id:'watanabe',  name:'渡辺',   password:'pass1234', role:'approver'},
+  {id:'treasurer', name:'会計',   password:'pass1234', role:'treasurer'}
+];
+
+const STATUS = {
+  DRAFT:    'draft',
+  REVIEW:   'review',
+  APPROVED: 'approved',
+  PAID:     'paid',
+  PUBLISHED:'published',
+  REJECTED: 'rejected'
+};
+const STATUS_LABEL = {
+  draft:'下書き', review:'承認待ち', approved:'承認済', paid:'出金済', published:'公開済', rejected:'差戻し'
+};
+const STATUS_BADGE = {
+  draft:'b-draft', review:'b-review', approved:'b-approved', paid:'b-paid', published:'b-published', rejected:'b-rejected'
+};
+
+function loadDB(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){
+    const init = {
+      users: JSON.parse(JSON.stringify(DEFAULT_USERS)),
+      requests: [],
+      logs: [],
+      projectRaised: 1505000
+    };
+    saveDB(init);
+    return init;
+  }
+  return JSON.parse(raw);
+}
+function saveDB(db){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function log(db, action, requestId, byUser){
+  db.logs.push({
+    at: new Date().toISOString(),
+    action,
+    requestId,
+    by: byUser || (currentUser?currentUser.name:'-')
+  });
+  saveDB(db);
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+let currentUser = null;
+function tryLogin(id, password){
+  const db = loadDB();
+  const u = db.users.find(x => x.id===id && x.password===password);
+  if(u){ currentUser = u; return true; }
+  return false;
+}
+function logout(){ currentUser=null; render(); }
+function canApprove(){ return currentUser && APPROVERS.includes(currentUser.name); }
+function canDisburse(){ return currentUser && currentUser.name===TREASURER; }
+
+// ============================================================
+// ROUTING / VIEWS
+// ============================================================
+let currentView = 'public';
+function setView(v){ currentView=v; document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.querySelector(`nav button[data-view="${v}"]`)?.classList.add('active'); renderMain(); }
+
+function render(){
+  if(!currentUser){ renderLogin(); return; }
+  document.getElementById('loginArea').innerHTML='';
+  document.getElementById('topNav').style.display='flex';
+  updateStatHeader();
+  renderMain();
+}
+
+function updateStatHeader(){
+  const db = loadDB();
+  const paid = db.requests.filter(r=>r.status===STATUS.PAID).reduce((s,r)=>s+r.amount,0);
+  const published = db.requests.filter(r=>r.status===STATUS.PUBLISHED).reduce((s,r)=>s+r.amount,0);
+  document.getElementById('statReceived').textContent = '¥'+paid.toLocaleString();
+  document.getElementById('statUsed').textContent = '¥'+published.toLocaleString();
+  document.getElementById('statBalance').textContent = '¥'+(db.projectRaised-paid-published).toLocaleString();
+}
+
+function renderLogin(){
+  document.getElementById('topNav').style.display='none';
+  document.getElementById('loginArea').innerHTML = `
+    <div class="login-box">
+      <div class="card">
+        <h2>🔐 ログイン</h2>
+        <div class="alert info">
+          <strong>承認者（ID/パス）</strong><br>
+          関川: sekikawa / 松島: matsushima / 大竹: otake / 渡辺: watanabe<br>
+          会計: treasurer<br>
+          <small>※ 初回ログイン後、管理画面で変更してください</small>
+        </div>
+        <form id="loginForm">
+          <label>ユーザーID</label>
+          <input id="loginId" required autocomplete="username">
+          <label>パスワード</label>
+          <input id="loginPw" type="password" required autocomplete="current-password">
+          <button class="primary" type="submit">ログイン</button>
+          <button class="secondary" type="button" onclick="setView('public')">公開ページを見る</button>
+        </form>
+      </div>
+    </div>`;
+  document.getElementById('loginForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const id = document.getElementById('loginId').value.trim();
+    const pw = document.getElementById('loginPw').value;
+    if(tryLogin(id,pw)) render();
+    else alert('IDまたはパスワードが違います');
+  });
+  renderPublic(true);  // also show public under login
+}
+
+function renderMain(){
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  switch(currentView){
+    case 'public': return renderPublic();
+    case 'new': return renderNew();
+    case 'approvals': return renderApprovals();
+    case 'disbursement': return renderDisbursement();
+    case 'all': return renderAll();
+    case 'admin': return renderAdmin();
+  }
+}
+
+// ----------- PUBLIC REPORT (always visible) -----------
+function renderPublic(standalone=false){
+  const db = loadDB();
+  const pub = db.requests.filter(r => r.status===STATUS.PUBLISHED)
+                         .sort((a,b)=> new Date(b.publishedAt)-new Date(a.publishedAt));
+  const totalUsed = pub.reduce((s,r)=>s+r.amount,0);
+  const balance = db.projectRaised - totalUsed;
+
+  let html = `
+    <div class="topbar">
+      <h2 style="margin:0;color:#1e3c72">📊 支援金の使途報告（公開）</h2>
+      ${currentUser?`<span class="user-tag">👤 ${currentUser.name}さん</span>
+        <button class="secondary" onclick="logout()">ログアウト</button>`:''}
+    </div>
+    <div class="alert info">
+      このページはどなたでも閲覧できます。プロジェクト発起人による<strong>「田久保前市長×1億円請求プロジェクト」</strong>で支援いただいた皆さまに、
+      集まった資金の使い道を透明性をもって報告いたします。承認された決済は会計担当による出金処理後に自動的にこちらへ反映されます。
+    </div>
+    <div class="summary">
+      <div class="item"><div class="label">支援総額</div><div class="value">¥${db.projectRaised.toLocaleString()}</div></div>
+      <div class="item"><div class="label">使用済み</div><div class="value">¥${totalUsed.toLocaleString()}</div></div>
+      <div class="item"><div class="label">残高</div><div class="value">¥${balance.toLocaleString()}</div></div>
+      <div class="item"><div class="label">公開件数</div><div class="value">${pub.length}件</div></div>
+    </div>`;
+
+  if(pub.length===0){
+    html += `<div class="card"><div class="empty">まだ公開済みの使途報告はありません。承認・出金処理が反映されるとここに表示されます。</div></div>`;
+  } else {
+    html += `<div class="card"><h2>使途一覧（新着順）</h2><div class="public-grid">`;
+    pub.forEach(r=>{
+      html += `
+        <div class="public-item">
+          <div class="meta">📅 ${r.publishedAt?sdf(new Date(r.publishedAt)):''}  ·  申請: ${escapeHtml(r.applicant)}  ·  承認者: ${r.approvals.map(a=>a.by).join('・') || '-'}  ·  出金担当: ${r.disbursedBy||'-'}</div>
+          <h3>${escapeHtml(r.title)}</h3>
+          <div class="amount">¥${r.amount.toLocaleString()}</div>
+          <p>${escapeHtml(r.description).replace(/\n/g,'<br>')}</p>
+        </div>`;
+    });
+    html += `</div></div>`;
+  }
+  document.getElementById('main').innerHTML = html;
+}
+
+// ----------- NEW REQUEST -----------
+function renderNew(){
+  if(!currentUser){ render(); return; }
+  const db = loadDB();
+  // requirement: "申請 ... 誰もができるように" - allow any logged-in user
+  const html = `
+    <div class="card">
+      <h2>➕ 新規決済申請</h2>
+      <div class="alert info">どなたでも申請可能です。承認は関川・松島・大竹・渡辺の <strong>4名全員一致</strong> で成立します。</div>
+      <form id="newForm">
+        <label>申請タイトル <span style="color:#c82333">*</span></label>
+        <input name="title" required maxlength="80" placeholder="例：告訴状 印紙代">
+        <label>金額（円）<span style="color:#c82333">*</span></label>
+        <input name="amount" type="number" min="1" required>
+        <label>カテゴリ</label>
+        <select name="category">
+          <option>裁判関連費用</option><option>弁護士費用</option><option>印紙・証明手数料</option>
+          <option>交通費・調査費</option><option>広報・告知</option><option>会議・会場</option>
+          <option>事務用品・通信</option><option>その他</option>
+        </select>
+        <label>使途・理由の詳細<span style="color:#c82333">*</span></label>
+        <textarea name="description" required maxlength="600" placeholder="何のために使うか、いくら根拠は何か"></textarea>
+        <button class="primary" type="submit">申請を提出（承認待ち）</button>
+        <button class="secondary" type="button" onclick="setView('all')">キャンセル</button>
+      </form>
+    </div>`;
+  document.getElementById('main').innerHTML = html;
+
+  document.getElementById('newForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const r = {
+      id: 'R'+Date.now(),
+      title: fd.get('title').trim(),
+      amount: parseInt(fd.get('amount'),10),
+      category: fd.get('category'),
+      description: fd.get('description').trim(),
+      applicant: currentUser.name,
+      applicantId: currentUser.id,
+      createdAt: new Date().toISOString(),
+      status: STATUS.REVIEW,
+      approvals: [],
+      disbursedBy: null,
+      disbursedAt: null,
+      publishedAt: null
+    };
+    db.requests.push(r);
+    log(db,'REQUEST_SUBMIT', r.id);
+    alert('申請を提出しました。全4名の承認が必要です。');
+    setView('all');
+  });
+}
+
+// ----------- APPROVALS -----------
+function renderApprovals(){
+  if(!currentUser){ render(); return; }
+  if(!canApprove()){
+    document.getElementById('main').innerHTML = `<div class="alert error">承認権限を持つ4名のログインメンバー（関川・松島・大竹・渡辺）でログインしてください。</div>`;
+    return;
+  }
+  const db = loadDB();
+  const me = currentUser.name;
+  const myPendings = db.requests.filter(r=>{
+    if(r.status!==STATUS.REVIEW) return false;
+    return !r.approvals.some(a=>a.by===me);
+  });
+  let html = `<div class="card"><h2>✅ あなたの承認待ち案件</h2>
+    <div class="alert warn">承認は <strong>4名全員一致</strong> で成立します。承認後、会計担当が出金処理を行います。</div>`;
+  if(myPendings.length===0){
+    html += `<div class="empty">あなたが承認すべき案件はありません。</div></div>`;
+  } else {
+    html += `<table><thead><tr><th>申請日</th><th>タイトル</th><th>金額</th><th>カテゴリ</th><th>現状</th><th>操作</th></tr></thead><tbody>`;
+    myPendings.forEach(r=>{
+      const approvedBy = r.approvals.map(a=>a.by).join('・');
+      html += `<tr><td>${sdf(new Date(r.createdAt))}</td><td><b>${escapeHtml(r.title)}</b><br><small>申請: ${r.applicant}</small></td><td>¥${r.amount.toLocaleString()}</td><td>${escapeHtml(r.category)}</td><td><div class="progress">${APPROVERS.map(a=> `<span title="${a}" class="dot ${r.approvals.some(x=>x.by===a)?'on':''} ${a===me?'current':''}"></span>`).join('')}<span>${r.approvals.length}/${APPROVERS.length}</span></div><small>${approvedBy||'未承認'}</small></td>
+      <td>
+        <button class="primary" onclick="approve('${r.id}')">✓ 承認</button>
+        <button class="danger" onclick="reject('${r.id}')">差戻し</button>
+        <button class="small" onclick="viewDetail('${r.id}')">詳細</button>
+      </td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  document.getElementById('main').innerHTML = html;
+}
+
+function approve(id){
+  const db = loadDB();
+  const r = db.requests.find(x=>x.id===id);
+  if(!r) return;
+  if(r.status!==STATUS.REVIEW){ alert('既に処理されています'); return; }
+  if(r.approvals.some(a=>a.by===currentUser.name)){ alert('あなたが既に承認済みです'); return; }
+  r.approvals.push({by:currentUser.name, at:new Date().toISOString()});
+  log(db,'APPROVE', id);
+  // 4名全員揃ったら approved
+  if(r.approvals.length >= APPROVERS.length){
+    r.status = STATUS.APPROVED;
+    log(db,'FULLY_APPROVED', id);
+    alert(`✅ 全4名の承認が揃いました。会計担当へ出金依頼が自動で送られます。\n申請ID: ${r.title}`);
+  } else {
+    alert(`${currentUser.name}さんが承認しました（あと${APPROVERS.length - r.approvals.length}名）`);
+  }
+  saveDB(db); updateStatHeader(); renderApprovals();
+}
+function reject(id){
+  if(!confirm('この申請を差し戻しますか？')) return;
+  const db = loadDB();
+  const r = db.requests.find(x=>x.id===id);
+  if(!r) return;
+  r.status = STATUS.REJECTED;
+  r.rejectReason = prompt('差し戻し理由（任意）') || '';
+  log(db,'REJECT', id);
+  saveDB(db); renderApprovals();
+}
+
+// ----------- DISBURSEMENT -----------
+function renderDisbursement(){
+  if(!currentUser){ render(); return; }
+  if(!canDisburse()){
+    document.getElementById('main').innerHTML = `<div class="alert error">出金処理は会計担当のみ行えます（現在: ${currentUser.name}さん）。</div>`;
+    return;
+  }
+  const db = loadDB();
+  const approved = db.requests.filter(r=>r.status===STATUS.APPROVED);
+  let html = `<div class="card"><h2>💰 出金処理（会計担当）</h2>
+    <div class="alert success">承認が揃った案件はここに表示されます。出金処理を実行すると、自動で公開ページへ反映されます。</div>`;
+  if(approved.length===0){
+    html += `<div class="empty">出金待ちの案件はありません。</div></div>`;
+  } else {
+    html += `<table><thead><tr><th>ID</th><th>タイトル</th><th>金額</th><th>カテゴリ</th><th>申請者</th><th>承認者</th><th>操作</th></tr></thead><tbody>`;
+    approved.forEach(r=>{
+      html += `<tr><td><small>${r.id}</small></td><td><b>${escapeHtml(r.title)}</b></td><td>¥${r.amount.toLocaleString()}</td><td>${escapeHtml(r.category)}</td><td>${r.applicant}</td><td><small>${r.approvals.map(a=>a.by).join('・')}</small></td>
+      <td>
+        <button class="primary" onclick="disburse('${r.id}')">💸 出金完了</button>
+        <button class="small" onclick="viewDetail('${r.id}')">詳細</button>
+      </td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  document.getElementById('main').innerHTML = html;
+}
+function disburse(id){
+  if(!confirm('出金処理を行います。よろしいですか？')) return;
+  const db = loadDB();
+  const r = db.requests.find(x=>x.id===id);
+  if(!r || r.status!==STATUS.APPROVED){ alert('この案件は出金対象ではありません'); return; }
+  r.status = STATUS.PAID;
+  r.disbursedAt = new Date().toISOString();
+  r.disbursedBy = currentUser.name;
+  log(db,'DISBURSE', id);
+  // 公開ページへ自動反映
+  r.status = STATUS.PUBLISHED;
+  r.publishedAt = new Date().toISOString();
+  log(db,'PUBLISH', id);
+  saveDB(db); updateStatHeader();
+  alert(`✅ 出金処理完了・公開されました。\n申請: ${r.title}\n金額: ¥${r.amount.toLocaleString()}`);
+  renderDisbursement();
+}
+
+// ----------- ALL REQUESTS (with edit) -----------
+function renderAll(){
+  if(!currentUser){ render(); return; }
+  const db = loadDB();
+  const list = [...db.requests].sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+  let html = `<div class="card"><h2>📋 全申請一覧（編集可能）</h2>
+    <div class="alert info">後から内容を修正できます。承認後の修正は再承認が必要になる場合があります。</div>`;
+  if(list.length===0){
+    html += `<div class="empty">まだ申請はありません。「新規申請」から作成してください。</div></div>`;
+  } else {
+    html += `<table><thead><tr><th>状態</th><th>申請日</th><th>タイトル</th><th>金額</th><th>申請者</th><th>承認状況</th><th>出金</th><th>操作</th></tr></thead><tbody>`;
+    list.forEach(r=>{
+      const approved = r.approvals.length;
+      html += `<tr>
+        <td><span class="badge ${STATUS_BADGE[r.status]}">${STATUS_LABEL[r.status]}</span></td>
+        <td>${sdf(new Date(r.createdAt))}</td>
+        <td><b>${escapeHtml(r.title)}</b><br><small>${escapeHtml(r.category)}</small></td>
+        <td>¥${r.amount.toLocaleString()}</td>
+        <td>${r.applicant}</td>
+        <td><div class="progress">${APPROVERS.map(a=> `<span title="${a}" class="dot ${r.approvals.some(x=>x.by===a)?'on':''}"></span>`).join('')}<span>${approved}/${APPROVERS.length}</span></div></td>
+        <td>${r.disbursedAt?sdf(new Date(r.disbursedAt))+(r.disbursedBy?'<br><small>'+r.disbursedBy+'</small>':''):'-'}</td>
+        <td>
+          <button class="small" onclick="viewDetail('${r.id}')">詳細</button>
+          <button class="small" onclick="editRequest('${r.id}')">✎ 編集</button>
+          ${(currentUser.role==='approver'||currentUser.name===TREASURER)?`<button class="danger" onclick="deleteRequest('${r.id}')">削除</button>`:''}
+        </td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  document.getElementById('main').innerHTML = html;
+}
+
+function viewDetail(id){
+  const db = loadDB();
+  const r = db.requests.find(x=>x.id===id);
+  if(!r) return;
+  const logs = db.logs.filter(l=>l.requestId===id).sort((a,b)=> new Date(b.at)-new Date(a.at));
+  const html = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>${escapeHtml(r.title)} <span class="badge ${STATUS_BADGE[r.status]}">${STATUS_LABEL[r.status]}</span></h3>
+        <p><b>金額:</b> ¥${r.amount.toLocaleString()}<br>
+        <b>カテゴリ:</b> ${escapeHtml(r.category)}<br>
+        <b>申請者:</b> ${r.applicant}<br>
+        <b>申請日:</b> ${sdf(new Date(r.createdAt))}<br>
+        ${r.disbursedBy?`<b>出金担当:</b> ${r.disbursedBy}（${sdf(new Date(r.disbursedAt))}）<br>`:''}
+        ${r.publishedAt?`<b>公開日:</b> ${sdf(new Date(r.publishedAt))}<br>`:''}</p>
+        <h4 style="color:#1e3c72;margin-top:16px">使途・理由</h4>
+        <div style="background:#f0f4f9;padding:12px;border-radius:4px;white-space:pre-wrap">${escapeHtml(r.description)}</div>
+        <h4 style="color:#1e3c72;margin-top:16px">承認状況</h4>
+        <div class="checklist">${APPROVERS.map(a=>{
+          const found = r.approvals.find(x=>x.by===a);
+          return `<div class="${found?'ok':''}">${found?'✓':'…'} ${a}${found?' ('+sdf(new Date(found.at))+')':''}</div>`;
+        }).join('')}</div>
+        <h4 style="color:#1e3c72;margin-top:16px">履歴</h4>
+        ${logs.length===0?'<div class="empty">履歴なし</div>':
+          '<table>'+logs.map(l=>`<tr><td>${sdf(new Date(l.at))}</td><td>${l.action}</td><td>${l.by}</td></tr>`).join('')+'</table>'}
+        <div style="margin-top:20px;text-align:right"><button class="secondary" onclick="this.closest('.modal-bg').remove()">閉じる</button></div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editRequest(id){
+  const db = loadDB();
+  const r = db.requests.find(x=>x.id===id);
+  if(!r) return;
+  // 公開済はタイトル/金額修正はリスク - 内容のみ
+  const html = `
+    <div class="modal-bg" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>申請の編集</h3>
+        <div class="alert warn">注意: 公開済の場合はタイトルや金額は変更すると過去の報告と齟齬が出る可能性があります。</div>
+        <form id="editForm">
+          <label>タイトル</label><input name="title" value="${escapeAttr(r.title)}" required>
+          <label>金額</label><input name="amount" type="number" value="${r.amount}" required>
+          <label>カテゴリ</label><select name="category">${
+            ['裁判関連費用','弁護士費用','印紙・証明手数料','交通費・調査費','広報・告知','会議・会場','事務用品・通信','その他']
+            .map(c=>`<option ${c===r.category?'selected':''}>${c}</option>`).join('')
+          }</select>
+          <label>使途・理由</label><textarea name="description" required>${escapeHtml(r.description)}</textarea>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button type="button" class="secondary" onclick="this.closest('.modal-bg').remove()">キャンセル</button>
+            <button class="primary" type="submit">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('editForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const old = {...r};
+    r.title = fd.get('title').trim();
+    r.amount = parseInt(fd.get('amount'),10);
+    r.category = fd.get('category');
+    r.description = fd.get('description').trim();
+    r.lastEditedAt = new Date().toISOString();
+    r.lastEditedBy = currentUser.name;
+    log(db,'EDIT', id, `by ${currentUser.name} (${Object.keys(old).filter(k=>old[k]!==r[k]&&typeof old[k]!=='object').join(',')})`);
+    saveDB(db); document.querySelector('.modal-bg').remove(); renderMain();
+    alert('保存しました。');
+  });
+}
+
+function deleteRequest(id){
+  if(!confirm('この申請を削除しますか？\n履歴もすべて失われます。')) return;
+  const db = loadDB();
+  db.requests = db.requests.filter(x=>x.id!==id);
+  db.logs = db.logs.filter(l=>l.requestId!==id);
+  saveDB(db); loadDB(); updateStatHeader(); renderMain();
+}
+
+// ----------- ADMIN -----------
+function renderAdmin(){
+  if(!currentUser){ render(); return; }
+  const db = loadDB();
+  const html = `
+    <div class="card">
+      <h2>⚙️ 管理</h2>
+      <div class="alert info">パスワードの変更や、支援総額の校正、他の閲覧専用ユーザーの追加ができます。</div>
+      <h3 style="color:#1e3c72">ユーザー一覧</h3>
+      <table><thead><tr><th>ログインID</th><th>表示名</th><th>役割</th><th>パスワード</th><th>操作</th></tr></thead><tbody>
+      ${db.users.map((u,i)=>`<tr>
+        <td><input value="${escapeAttr(u.id)}" onchange="updateUser(${i},'id',this.value)"></td>
+        <td><input value="${escapeAttr(u.name)}" onchange="updateUser(${i},'name',this.value)"></td>
+        <td><select onchange="updateUser(${i},'role',this.value)">
+          <option value="approver" ${u.role==='approver'?'selected':''}>承認者</option>
+          <option value="treasurer" ${u.role==='treasurer'?'selected':''}>会計</option>
+          <option value="viewer" ${u.role==='viewer'?'selected':''}>閲覧</option>
+        </select></td>
+        <td><input type="text" value="${escapeAttr(u.password)}" onchange="updateUser(${i},'password',this.value)"></td>
+        <td><button class="danger" onclick="removeUser(${i})">削除</button></td>
+      </tr>`).join('')}
+      </tbody></table>
+      <button class="primary" onclick="addUser()" style="margin-top:12px">+ ユーザー追加</button>
+    </div>
+    <div class="card">
+      <h3 style="color:#1e3c72">プロジェクト設定</h3>
+      <label>支援総額（クラファンで集まった金額）</label>
+      <input type="number" value="${db.projectRaised}" onchange="setRaised(this.value)" style="max-width:240px">
+      <label style="margin-top:12px;display:block">ログ初期化（すべての申請と履歴を削除）</label>
+      <button class="danger" onclick="resetAll()">⚠️ 全データを初期化</button>
+    </div>
+    <div class="card">
+      <h3 style="color:#1e3c72">ログ（直近20件）</h3>
+      <table><thead><tr><th>日時</th><th>アクション</th><th>申請ID</th><th>実行者</th></tr></thead><tbody>
+      ${db.logs.slice(-20).reverse().map(l=>`<tr><td>${sdf(new Date(l.at))}</td><td>${l.action}</td><td>${l.requestId}</td><td>${l.by}</td></tr>`).join('')||'<tr><td colspan=4 class="empty">ログなし</td></tr>'}
+      </tbody></table>
+    </div>`;
+  document.getElementById('main').innerHTML = html;
+}
+
+function updateUser(i,field,value){
+  const db = loadDB();
+  db.users[i][field]=value;
+  saveDB(db);
+}
+function addUser(){
+  const db = loadDB();
+  const id = prompt('新規ログインIDを入力');
+  if(!id) return;
+  if(db.users.find(u=>u.id===id)){ alert('既に存在します'); return; }
+  const name = prompt('表示名')||id;
+  const password = prompt('初期パスワード')||'pass1234';
+  const role = prompt('役割 (approver / treasurer / viewer)','viewer')||'viewer';
+  db.users.push({id,name,password,role});
+  saveDB(db); renderAdmin();
+}
+function removeUser(i){
+  if(!confirm('このユーザーを削除しますか？')) return;
+  const db = loadDB();
+  db.users.splice(i,1);
+  saveDB(db); renderAdmin();
+}
+function setRaised(v){
+  const db = loadDB();
+  db.projectRaised = parseInt(v,10)||0;
+  saveDB(db); updateStatHeader(); alert('支援総額を更新しました');
+}
+function resetAll(){
+  if(!confirm('本当に全データを初期化しますか？')) return;
+  if(!confirm('もう一度確認: すべての申請・履歴が削除されます。元に戻せません。')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  currentUser=null;
+  alert('初期化しました');
+  render();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function sdf(d){ return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function escapeHtml(s){ if(s==null)return''; return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+// nav handler
+document.getElementById('topNav').addEventListener('click', e=>{
+  if(e.target.tagName==='BUTTON'){
+    setView(e.target.dataset.view);
+  }
+});
+
+// initial
+render();
+</script>
+</body>
+</html>
